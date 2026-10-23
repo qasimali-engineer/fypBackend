@@ -44,5 +44,5 @@ python -c "import sklearn, nltk, spacy, tensorflow, torch, transformers; print('
 
 ## Environment variables
 
-Create a local `.env` file for environment-specific settings and secrets.
+Create a local `.env` file for environment-specific settings and  secrets.
 Do not commit `.env`; it is excluded by `.gitignore`.
