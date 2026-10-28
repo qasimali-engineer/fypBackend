@@ -16,7 +16,9 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
+from predictor.views import classify_self_harm
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('api/classify/', classify_self_harm, name='classify-self-harm'),
 ]

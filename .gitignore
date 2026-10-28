@@ -56,6 +56,10 @@ staticfiles/
 # Jupyter
 .ipynb_checkpoints/
 
+# Local training data and generated model artifacts
+Data_set/*.csv
+fyp-xlmr-model/
+
 # IDE and OS files
 .vscode/
 .idea/
