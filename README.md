@@ -10,7 +10,19 @@ Backend for the final-year project.
 The project dependencies are listed in
 [requirements.txt](C:/Users/User/Desktop/fypBackend/requirements.txt).
 
-## Setup
+## Setup from a fresh clone
+
+The Git repository contains the application source code only. The dataset and
+the fine-tuned model are intentionally excluded from Git because together they
+are several gigabytes and exceed normal GitHub file limits. A new clone must
+therefore obtain the local artifacts before the API can make predictions.
+
+Clone the repository and enter it:
+
+```powershell
+git clone https://github.com/qasimali-engineer/fypBackend.git
+cd fypBackend
+```
 
 Create and activate a virtual environment:
 
@@ -26,9 +38,57 @@ python -m pip install --upgrade pip
 python -m pip install -r requirements.txt
 ```
 
+Apply the Django migrations:
+
+```powershell
+python manage.py migrate
+```
+
 The requirements include Django, Django REST Framework, PostgreSQL support,
 data-science libraries, NLP libraries, TensorFlow, PyTorch, and Hugging Face
 Transformers.
+
+## Obtain the dataset and trained model
+
+The following paths and files are required:
+
+```text
+Data_set/
+  nonsuicide_english.csv
+  nonsuicide_urdu.csv
+  nonsuicide_roman_urdu.csv
+  suicide_english.csv
+  suicide_urdu.csv
+  suicide_roman_urdu.csv
+
+fyp-xlmr-model/
+  config.json
+  model.safetensors
+  tokenizer.json
+  tokenizer_config.json
+  training_args.bin
+```
+
+These files are not downloaded by `git clone`. At present, this repository
+does not publish a public download URL for the custom dataset or trained
+model. Copy them from the project owner or download them from the project's
+approved private storage, preserving the folder names above. For example, if
+an archive is supplied, extract it at the repository root:
+
+```powershell
+Expand-Archive .\fypBackend-artifacts.zip -DestinationPath . -Force
+```
+
+After copying or extracting the artifacts, verify that the model can be
+loaded:
+
+```powershell
+python -c "from pathlib import Path; from transformers import AutoTokenizer, AutoModelForSequenceClassification; p=Path('fyp-xlmr-model'); AutoTokenizer.from_pretrained(p); AutoModelForSequenceClassification.from_pretrained(p); print('Model loaded successfully.')"
+```
+
+If a trained model is not available, generate one locally by following the
+training instructions below. Training requires the six language-specific CSV
+files in `Data_set/`.
 
 ## Verify the installation
 
@@ -62,6 +122,20 @@ evaluation metrics alongside the model. Use `--rows-per-file` to change the
 sample size. For production training, use the full files with
 `--rows-per-file 60000` and review `recall_suicide` before deploying.
 
+For a complete local training run using all available rows, use:
+
+```powershell
+python scripts/train_xlmr.py `
+  --data-dir .\Data_set `
+  --output-dir .\fyp-xlmr-model `
+  --epochs 3 `
+  --rows-per-file 60000
+```
+
+Training creates the required `fyp-xlmr-model/` directory. It can take
+substantial time and disk space, especially while checkpoints are being
+written.
+
 To generate a SHAP token-attribution visualization after training:
 
 ```powershell
@@ -74,7 +148,8 @@ The generated HTML shows which tokens contributed to each class prediction.
 
 ## Self-harm classification API
 
-After `fyp-xlmr-model/` has been created, start Django:
+After `fyp-xlmr-model/` has been copied, downloaded, or created by training,
+start Django:
 
 ```powershell
 python manage.py runserver
